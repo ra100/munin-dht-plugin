@@ -24,7 +24,7 @@ configure munin mode, add to /etc/munin/plugin-conf.d/munin-node
 
 You can then check if it's working via
 
-    munin-run dht_foo
+    munin-run dht_11_4
 
 Restart the munin node afterwards to get the results reported to the server:
 

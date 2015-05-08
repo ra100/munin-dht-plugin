@@ -23,6 +23,7 @@ import dhtreader
 sensor_type = sys.argv[0].split('_', 2)[1]
 sensor_gpio = sys.argv[0].split('_', 2)[2]
 where = os.getenv('where', 'N/A')
+try_count = int(os.getenv('try_count', 10))
 
 def print_config():
     print """graph_title Humidity and Temperature in %(where)s
@@ -66,7 +67,7 @@ def fetch_values(sensor_type, sensor_gpio):
     reader = dhtreader.init()
     values = None
     tries = 0
-    while (values == None and tries < 10):
+    while (values == None and tries < try_count):
         values = dhtreader.read(sensor_type, sensor_gpio)
         tries += 1
         time.sleep(1)

@@ -10,15 +10,20 @@ based on
 
 USAGE
 link dht_ to munin plugins. For DHT11 on GPIO 4 use:
-<pre>
-ln -s $PWD/dht_ /etc/munin/plugins/dht_11_4
-</pre>
+    ln -s $PWD/dht_ /etc/munin/plugins/dht_11_4
 
 configure munin mode, add to /etc/munin/plugin-conf.d/munin-node
-<pre>
-[dht_*]
-user root
+    [dht_*]
+    user root
 
-[dht_11_4]
-env.where Living room
-</pre>
+    [dht_11_4]
+    env.where Living room
+
+You can then check if it's working via
+
+    munin-run dht_foo
+
+Restart the munin node afterwards to get the results reported to the server:
+
+    service munin-node restart
+

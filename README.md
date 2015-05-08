@@ -9,10 +9,13 @@ based on
 
 
 USAGE
+
 link dht_ to munin plugins. For DHT11 on GPIO 4 use:
+    
     ln -s $PWD/dht_ /etc/munin/plugins/dht_11_4
 
 configure munin mode, add to /etc/munin/plugin-conf.d/munin-node
+    
     [dht_*]
     user root
 

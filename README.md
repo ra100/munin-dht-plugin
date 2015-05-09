@@ -1,6 +1,10 @@
 # munin-dht-plugin
 Munin plugin for reading temperature and humidity from DHT modules. DHT11, DHT22, AM2302. Uses dhtreader python library.
 
+Sample graph
+
+<img src="http://ra100.github.io/munin-dht-plugin/images/dht_11_4-day.png" />
+
 requires <a href="https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver_Python">Adafruit_DHT_Driver_Python</a>
 
 based on

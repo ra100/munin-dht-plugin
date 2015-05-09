@@ -14,7 +14,7 @@ link dht_ to munin plugins. For DHT11 on GPIO 4 use:
     
     ln -s $PWD/dht_ /etc/munin/plugins/dht_11_4
 
-configure munin mode, add to /etc/munin/plugin-conf.d/munin-node. You can set name of sensor, number of tries to fetch values (sometimes sensor dhtreader doesn't return values) and number of successful readings from which script counts average and removes outlier values, this should eliminate reading errors or anomalies.
+configure munin mode, add to /etc/munin/plugin-conf.d/munin-node. You can set name of sensor, number of tries to fetch values (sometimes sensor dhtreader doesn't return values) and number of successful readings from which script counts average and removes outlier values, this should eliminate reading errors or anomalies. If you don't want to use more tries, set env.try_count to 1. If you don't want to count average, set env.average to 1. env.try_count should be greater or equal to env.average
     
     [dht_*]
     user root

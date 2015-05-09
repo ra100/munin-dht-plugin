@@ -7,7 +7,20 @@ based on
 <a href="https://github.com/gajdipajti/munin-rpi-temp">https://github.com/gajdipajti/munin-rpi-temp</a>
 <a href="https://github.com/agx/munin-dht">https://github.com/agx/munin-dht</a>
 
+INSTALLATION
 
+install Adafruit_DHT_Driver_Python driver (for prerequisities check <a href="https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_DHT_Driver_Python">driver repository</a>)
+     
+    git clone git@github.com:adafruit/Adafruit-Raspberry-Pi-Python-Code.git
+    cd Adafruit-Raspberry-Pi-Python-Code/Adafruit-Raspberry-Pi-Python-Code
+    python setup.py build
+    sudo python setup.py install
+    
+    cd ../..
+    git clone git@github.com:ra100/munin-dht-plugin.git
+    cd munin-dht-plugin
+    sudo ln -s $PWD/dht_ /etc/munin/plugins/dht_SENSORTYPE_GPIOPIN
+    
 USAGE
 
 link dht_ to munin plugins. For DHT11 on GPIO 4 use:
@@ -26,9 +39,8 @@ configure munin mode, add to /etc/munin/plugin-conf.d/munin-node. You can set na
 
 You can then check if it's working via
 
-    munin-run dht_11_4
+    sudo munin-run dht_11_4
 
 Restart the munin node afterwards to get the results reported to the server:
 
-    service munin-node restart
-
+    sudo service munin-node restart

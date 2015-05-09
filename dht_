@@ -92,8 +92,8 @@ def remove_outlier(readings):
         abberations.append(abb)
         avg[2] += abb[0]
         avg[3] += abb[1]
-    avg[2] = (avg[2]/len(readings)) *2
-    avg[3] = (avg[3]/len(readings)) *2
+    avg[2] = (avg[2]/len(readings))
+    avg[3] = (avg[3]/len(readings))
     vals = 0
     avg[0] = 0
     avg[1] = 0

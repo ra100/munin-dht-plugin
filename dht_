@@ -26,13 +26,12 @@
 import os
 import sys
 import math
-import time
 import dhtreader
 
 sensor_type = sys.argv[0].split('_', 2)[1]
 sensor_gpio = sys.argv[0].split('_', 2)[2]
 where = os.getenv('where', 'N/A')
-try_count = int(os.getenv('try_count', 10))
+try_count = int(os.getenv('try_count', 15))
 average = int(os.getenv('average', 4))
 
 def print_config():
@@ -118,7 +117,6 @@ def fetch_values(sensor_type, sensor_gpio):
             readings.append(values)
             good += 1
         tries += 1
-        time.sleep(1)
     
     results = remove_outlier(readings)
     

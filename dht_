@@ -11,6 +11,15 @@
 # Please make the symlink as dht_TYPE_GPIOPIN
 # Example dht_11_4
 #
+# add lines to munin plugins conf, usualy /etc/munin/plugin-conf.d/munin-node
+#    [dht_*]
+#    user root
+#
+#    [dht_11_4]
+#    env.where Living room
+#    env.try_count 10
+#    env.average 4
+#
 #%# capabilities=autoconf
 #%# family=contrib
 
@@ -24,6 +33,7 @@ sensor_type = sys.argv[0].split('_', 2)[1]
 sensor_gpio = sys.argv[0].split('_', 2)[2]
 where = os.getenv('where', 'N/A')
 try_count = int(os.getenv('try_count', 10))
+average = int(os.getenv('average', 4))
 
 def print_config():
     print """graph_title Humidity and Temperature in %(where)s
@@ -61,19 +71,59 @@ def calc_dewpoint(temp, hum):
     n = ((K2 * K3) / (K3 + theta)) - lnphi
 
     return K3 * (z/n)
-    
+   
+
+def remove_outlier(readings):
+    if (len(readings) == 1):
+        return readings[0]
+    #count average temp, hum, temp abberation, hum abberation
+    avg = [0, 0, 0, 0]
+    for val in readings:
+        avg[0] += val[0]
+        avg[1] += val[1]
+    avg[0] = avg[0]/len(readings)
+    avg[1] = avg[1]/len(readings)
+    if (len(readings) == 2):
+        return avg
+    #average abberation
+    abberations = []
+    for val in readings:
+        abb = [abs(avg[0] - val[0]), abs(avg[1] - val[1])]
+        abberations.append(abb)
+        avg[2] += abb[0]
+        avg[3] += abb[1]
+    avg[2] = avg[2]/len(readings)
+    avg[3] = avg[3]/len(readings)
+    vals = 0
+    avg[0] = 0
+    avg[1] = 0
+    for index,val in enumerate(readings):
+        if (abberations[index][0] <= avg[2]) and (abberations[index][1] <= avg[3]):
+            vals += 1
+            avg[0] += val[0]
+            avg[1] += val[1]
+    avg[0] = avg[0]/vals
+    avg[1] = avg[1]/vals
+    return avg
 
 def fetch_values(sensor_type, sensor_gpio):
     reader = dhtreader.init()
     values = None
     tries = 0
-    while (values == None and tries < try_count):
+    good = 0
+    readings = []
+    while (good < average and tries < try_count):
         values = dhtreader.read(sensor_type, sensor_gpio)
+        if values != None:
+            readings.append(values)
+            good += 1
         tries += 1
         time.sleep(1)
-        
-    temp = values[0]
-    hum = values[1]
+    
+    results = remove_outlier(readings)
+    
+    temp = results[0]
+    hum = results[1]
     dp = calc_dewpoint(temp, hum)
     print "temp.value %f" % temp
     print "hum.value %f" % hum

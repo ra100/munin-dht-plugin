@@ -12,13 +12,15 @@
 # Example dht_11_4
 #
 # add lines to munin plugins conf, usualy /etc/munin/plugin-conf.d/munin-node
-#    [dht_*]
-#    user root
+#   [dht_*]
+#   user root
 #
-#    [dht_11_4]
-#    env.where Living room
-#    env.try_count 10
-#    env.average 4
+#   [dht_11_4]
+#   env.where Living room
+#   env.try_count 10
+#   env.average 4
+#   env.debug false
+#   env.sleep 1   
 #
 #%# capabilities=autoconf
 #%# family=contrib
@@ -26,6 +28,7 @@
 import os
 import sys
 import math
+import time
 import dhtreader
 
 sensor_type = sys.argv[0].split('_', 2)[1]
@@ -33,6 +36,8 @@ sensor_gpio = sys.argv[0].split('_', 2)[2]
 where = os.getenv('where', 'N/A')
 try_count = int(os.getenv('try_count', 15))
 average = int(os.getenv('average', 4))
+debug = os.getenv('debug', 'false')
+sleep = float(os.getenv('sleep', 1))
 
 def print_config():
     print """graph_title Humidity and Temperature in %(where)s
@@ -51,6 +56,12 @@ hum.warning 50
 dp.label Dewpoint
 dp.type GAUGE
 """  % dict(sensor_type=sensor_type, where=where, sensor_gpio=sensor_gpio)
+    if debug == "true":
+        print """readings.label Successful readings
+readings.type GAUGE
+tries.label All readings
+tries.type GAUGE
+"""
 
 K2 = 17.5043
 K3 = 241.2
@@ -117,6 +128,7 @@ def fetch_values(sensor_type, sensor_gpio):
             readings.append(values)
             good += 1
         tries += 1
+        time.sleep(sleep)
     
     results = remove_outlier(readings)
     
@@ -126,6 +138,9 @@ def fetch_values(sensor_type, sensor_gpio):
     print "temp.value %f" % temp
     print "hum.value %f" % hum
     print "dp.value %f" % dp
+    if debug == "true":
+        print "readings.value %f" % good
+        print "tries.value %f" % tries
 
 
 def main(args):

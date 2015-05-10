@@ -40,6 +40,8 @@ configure munin mode, add to /etc/munin/plugin-conf.d/munin-node. You can set na
     env.where Living room
     env.try_count 10
     env.average 4
+    env.debug false
+    env.sleep 1 
 
 You can then check if it's working via
 

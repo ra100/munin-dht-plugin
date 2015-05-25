@@ -51,8 +51,8 @@ hum.label Humidity
 hum.type GAUGE
 hum.max 100
 hum.min 0
-hum.critical 60
-hum.warning 50
+hum.critical 70
+hum.warning 60
 dp.label Dewpoint
 dp.type GAUGE
 """  % dict(sensor_type=sensor_type, where=where, sensor_gpio=sensor_gpio)

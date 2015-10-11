@@ -116,6 +116,47 @@ def remove_outlier(readings):
     avg[1] = avg[1]/vals
     return avg
 
+
+def write_to_file(filename, val1, val2):
+    with open(filename, "w") as text_file:
+        text_file.write(str(val1))
+        text_file.write("\n")
+        text_file.write(str(val2))
+
+
+def check_old_values(temp):
+    filename = "/tmp/dht_{0}_{1}".format(sensor_type, sensor_gpio)
+    if os.path.isfile(filename): 
+        with open(filename, "r") as text_file:
+            data = text_file.read().splitlines(True)
+        if len(data) > 0:
+            data[0] = data[0].strip("\n")
+            if len(data) == 1:
+                write_to_file(filename, data[0], temp)
+            if len(data) == 2:
+                diverge = 0
+                if abs(float(data[0]) - temp) > 20:
+                    diverge += 1
+                if abs(float(data[1]) - temp) > 20:
+                    diverge += 1
+                if diverge == 0:
+                    write_to_file(filename, data[1], temp)
+                    return True
+                if diverge == 1:
+                    if abs(float(data[0]) - temp) > 20: #assume that 2 bad readings in row won't ever happen second old must be wrong
+                        write_to_file(filename, data[0], temp)
+                    else:
+                        write_to_file(filename, data[1], temp)
+                if diverge == 2: #assume that 2 bad readings in row won't ever happen
+                    return False
+                              
+    else:
+        with open(filename, "w") as text_file:
+            text_file.write(str(temp))
+        return True
+
+
+
 def fetch_values(sensor_type, sensor_gpio):
     reader = dhtreader.init()
     values = None
@@ -135,12 +176,13 @@ def fetch_values(sensor_type, sensor_gpio):
     temp = results[0]
     hum = results[1]
     dp = calc_dewpoint(temp, hum)
-    print "temp.value %f" % temp
-    print "hum.value %f" % hum
-    print "dp.value %f" % dp
-    if debug == "true":
-        print "readings.value %f" % good
-        print "tries.value %f" % tries
+    if check_old_values(temp):
+        print "temp.value %f" % temp
+        print "hum.value %f" % hum
+        print "dp.value %f" % dp
+        if debug == "true":
+            print "readings.value %f" % good
+            print "tries.value %f" % tries
 
 
 def main(args):

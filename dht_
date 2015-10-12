@@ -124,7 +124,7 @@ def write_to_file(filename, val1, val2):
         text_file.write(str(val2))
 
 
-def check_old_values(temp):
+def check_old_values(dp):
     filename = "/tmp/dht_{0}_{1}".format(sensor_type, sensor_gpio)
     if os.path.isfile(filename): 
         with open(filename, "r") as text_file:
@@ -132,21 +132,21 @@ def check_old_values(temp):
         if len(data) > 0:
             data[0] = data[0].strip("\n")
             if len(data) == 1:
-                write_to_file(filename, data[0], temp)
+                write_to_file(filename, data[0], dp)
             if len(data) == 2:
                 diverge = 0
-                if abs(float(data[0]) - temp) > 20:
+                if abs(float(data[0]) - dp) > 20:
                     diverge += 1
-                if abs(float(data[1]) - temp) > 20:
+                if abs(float(data[1]) - dp) > 20:
                     diverge += 1
                 if diverge == 0:
-                    write_to_file(filename, data[1], temp)
+                    write_to_file(filename, data[1], dp)
                     return True
                 if diverge == 1:
                     if abs(float(data[0]) - temp) > 20: #assume that 2 bad readings in row won't ever happen second old must be wrong
-                        write_to_file(filename, data[0], temp)
+                        write_to_file(filename, data[0], dp)
                     else:
-                        write_to_file(filename, data[1], temp)
+                        write_to_file(filename, data[1], dp)
                 if diverge == 2: #assume that 2 bad readings in row won't ever happen
                     return False
                               
@@ -176,7 +176,7 @@ def fetch_values(sensor_type, sensor_gpio):
     temp = results[0]
     hum = results[1]
     dp = calc_dewpoint(temp, hum)
-    if check_old_values(temp):
+    if check_old_values(dp):
         print "temp.value %f" % temp
         print "hum.value %f" % hum
         print "dp.value %f" % dp

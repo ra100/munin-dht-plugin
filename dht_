@@ -135,9 +135,9 @@ def check_old_values(dp):
                 write_to_file(filename, data[0], dp)
             if len(data) == 2:
                 diverge = 0
-                if abs(float(data[0]) - dp) > 20:
+                if abs(float(data[0]) - dp) > 10:
                     diverge += 1
-                if abs(float(data[1]) - dp) > 20:
+                if abs(float(data[1]) - dp) > 10:
                     diverge += 1
                 if diverge == 0:
                     write_to_file(filename, data[1], dp)
@@ -149,10 +149,14 @@ def check_old_values(dp):
                         write_to_file(filename, data[1], dp)
                 if diverge == 2: #assume that 2 bad readings in row won't ever happen
                     return False
+            else:
+                 with open(filename, "w") as text_file:
+                    text_file.write(str(dp))
+                 return True
                               
     else:
         with open(filename, "w") as text_file:
-            text_file.write(str(temp))
+            text_file.write(str(dp))
         return True
 
 

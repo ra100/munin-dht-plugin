@@ -149,10 +149,10 @@ def check_old_values(dp):
                         write_to_file(filename, data[1], dp)
                 if diverge == 2: #assume that 2 bad readings in row won't ever happen
                     return False
-            else:
-                 with open(filename, "w") as text_file:
-                    text_file.write(str(dp))
-                 return True
+        else:
+             with open(filename, "w") as text_file:
+                text_file.write(str(dp))
+             return True
                               
     else:
         with open(filename, "w") as text_file:

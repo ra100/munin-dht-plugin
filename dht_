@@ -135,9 +135,9 @@ def check_old_values(dp):
                 write_to_file(filename, data[0], dp)
             if len(data) == 2:
                 diverge = 0
-                if abs(float(data[0]) - dp) > 10:
+                if abs(float(data[0]) - dp) > 5:
                     diverge += 1
-                if abs(float(data[1]) - dp) > 10:
+                if abs(float(data[1]) - dp) > 5:
                     diverge += 1
                 if diverge == 0:
                     write_to_file(filename, data[1], dp)

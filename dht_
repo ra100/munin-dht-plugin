@@ -28,16 +28,11 @@
 import os
 import sys
 import math
-import time
-import dhtreader
+import Adafruit_DHT
 
 sensor_type = sys.argv[0].split('_', 2)[1]
 sensor_gpio = sys.argv[0].split('_', 2)[2]
 where = os.getenv('where', 'N/A')
-try_count = int(os.getenv('try_count', 15))
-average = int(os.getenv('average', 4))
-debug = os.getenv('debug', 'false')
-sleep = float(os.getenv('sleep', 1))
 
 def print_config():
     print """graph_title Humidity and Temperature in %(where)s
@@ -56,12 +51,6 @@ hum.warning 60
 dp.label Dewpoint
 dp.type GAUGE
 """  % dict(sensor_type=sensor_type, where=where, sensor_gpio=sensor_gpio)
-    if debug == "true":
-        print """readings.label Successful readings
-readings.type GAUGE
-tries.label All readings
-tries.type GAUGE
-"""
 
 K2 = 17.5043
 K3 = 241.2
@@ -83,110 +72,17 @@ def calc_dewpoint(temp, hum):
     return K3 * (z/n)
 
 
-def remove_outlier(readings):
-    if (len(readings) == 1):
-        return readings[0]
-    #count average temp, hum, temp abberation, hum abberation
-    avg = [0, 0, 0, 0]
-    for val in readings:
-        avg[0] += val[0]
-        avg[1] += val[1]
-    avg[0] = avg[0]/len(readings)
-    avg[1] = avg[1]/len(readings)
-    if (len(readings) == 2):
-        return avg
-    #average abberation
-    abberations = []
-    for val in readings:
-        abb = [abs(avg[0] - val[0]), abs(avg[1] - val[1])]
-        abberations.append(abb)
-        avg[2] += abb[0]
-        avg[3] += abb[1]
-    avg[2] = (avg[2]/len(readings))
-    avg[3] = (avg[3]/len(readings))
-    vals = 0
-    avg[0] = 0
-    avg[1] = 0
-    for index,val in enumerate(readings):
-        if (abberations[index][0] <= avg[2]) and (abberations[index][1] <= avg[3]):
-            vals += 1
-            avg[0] += val[0]
-            avg[1] += val[1]
-    avg[0] = avg[0]/vals
-    avg[1] = avg[1]/vals
-    return avg
-
-
-def write_to_file(filename, val1, val2):
-    with open(filename, "w") as text_file:
-        text_file.write(str(val1))
-        text_file.write("\n")
-        text_file.write(str(val2))
-
-
-def check_old_values(dp):
-    filename = "/tmp/dht_{0}_{1}".format(sensor_type, sensor_gpio)
-    if os.path.isfile(filename):
-        with open(filename, "r") as text_file:
-            data = text_file.read().splitlines(True)
-        if len(data) > 0:
-            data[0] = data[0].strip("\n")
-            if len(data) == 1:
-                write_to_file(filename, data[0], dp)
-            if len(data) == 2:
-                diverge = 0
-                if abs(float(data[0]) - dp) > 5:
-                    diverge += 1
-                if abs(float(data[1]) - dp) > 5:
-                    diverge += 1
-                if diverge == 0:
-                    write_to_file(filename, data[1], dp)
-                    return True
-                if diverge == 1:
-                    if abs(float(data[0]) - dp) > 20: #assume that 2 bad readings in row won't ever happen second old must be wrong
-                        write_to_file(filename, data[0], dp)
-                    else:
-                        write_to_file(filename, data[1], dp)
-                if diverge == 2: #assume that 2 bad readings in row won't ever happen
-                    return False
-        else:
-             with open(filename, "w") as text_file:
-                text_file.write(str(dp))
-             return True
-
-    else:
-        with open(filename, "w") as text_file:
-            text_file.write(str(dp))
-        return True
-
-
-
 def fetch_values(sensor_type, sensor_gpio):
-    reader = dhtreader.init()
-    values = None
-    tries = 0
-    good = 0
-    readings = []
-    while (good < average and tries < try_count):
-        values = dhtreader.read(sensor_type, sensor_gpio)
-        if values != None:
-            readings.append(values)
-            good += 1
-        tries += 1
-        time.sleep(sleep)
-
-    results = remove_outlier(readings)
-
-    temp = results[0]
-    hum = results[1]
+    sensor_args = { '11': Adafruit_DHT.DHT11,
+                '22': Adafruit_DHT.DHT22,
+                '2302': Adafruit_DHT.AM2302 }
+    sensor = sensor_args[str(sensor_type)]
+    hum, temp = Adafruit_DHT.read_retry(sensor, sensor_gpio)
     dp = calc_dewpoint(temp, hum)
-    if check_old_values(dp):
-        print "temp.value %f" % temp
-        print "hum.value %f" % hum
-        print "dp.value %f" % dp
-        if debug == "true":
-            print "readings.value %f" % good
-            print "tries.value %f" % tries
+    print "temp.value %0.1f" % temp
+    print "hum.value %0.1f" % hum
+    print "dp.value %0.1f" % dp
+    print "where.value %s" % where
 
 
 def main(args):
